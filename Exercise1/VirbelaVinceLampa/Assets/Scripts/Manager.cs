@@ -7,7 +7,9 @@ using Random = UnityEngine.Random;
 
 namespace VirbelaTest
 {
-    //implemented as singleton to reduce need for finding objects at runtime
+    /// <summary>
+    /// Main class that handles distance detection between player and other objects.
+    /// </summary>
     public class Manager : MonoBehaviour
     {
         [SerializeField] private Color itemClosestColor;
@@ -25,16 +27,39 @@ namespace VirbelaTest
         private List<Bot> botListRef;
         private Player playerRef;
 
+        /// <summary>
+        /// Accessor for <c>itemClosestColor</c>.
+        /// </summary>
         public Color ItemClosestColor => itemClosestColor;
+        
+        /// <summary>
+        /// Accessor for <c>itemDefaultColor</c>.
+        /// </summary>
         public Color ItemDefaultColor => itemDefaultColor;
+        
+        /// <summary>
+        /// Accessor for <c>botClosestColor</c>.
+        /// </summary>
         public Color BotClosestColor => botClosestColor;
+       
+        /// <summary>
+        /// Accessor for <c>botDefaultColor</c>.
+        /// </summary>
         public Color BotDefaultColor => botDefaultColor;
         
+        /// <summary>
+        /// Registers the player to the manager class.
+        /// </summary>
+        /// <param name="newPlayer">Player instance being registered.</param>
         public void RegisterPlayer(Player newPlayer)
         {
             playerRef = newPlayer;
         }
 
+        /// <summary>
+        /// Registers an Item instance to the manager class.
+        /// </summary>
+        /// <param name="newItem">Item instance being registered.</param>
         public void RegisterItem(Item newItem)
         {
             itemListRef.Add(newItem);
@@ -42,6 +67,10 @@ namespace VirbelaTest
             FindClosestItemToPlayer();
         }
         
+        /// <summary>
+        /// Registers a Bot instance to the manager class.
+        /// </summary>
+        /// <param name="newBot">Bot instance being registered.</param>
         public void RegisterBot(Bot newBot)
         {
             botListRef.Add(newBot);
@@ -49,6 +78,10 @@ namespace VirbelaTest
             FindClosestBotToPlayer();
         }
 
+        /// <summary>
+        /// Removes a Movable instance from the manager's managed objects.
+        /// </summary>
+        /// <param name="deletedMovable">Movable instance being removed.</param>
         public void UnregisterMovable(MovableObject deletedMovable)
         {
             if (deletedMovable is Item)
@@ -77,6 +110,10 @@ namespace VirbelaTest
             }
         }
 
+        /// <summary>
+        /// Invoked to notify manager that a Movable has moved.
+        /// </summary>
+        /// <param name="moveObj">Movable instance that moved.</param>
         public void ReportMovableMoved(MovableObject moveObj)
         {
             if (moveObj is Player)
@@ -93,22 +130,37 @@ namespace VirbelaTest
             }
         }
         
+        /// <summary>
+        /// Called when a Bot moves and reacts to said movement as needed.
+        /// </summary>
+        /// <param name="reporter">Bot instance that moved.</param>
         private void ReportBotMoved(Bot reporter)
         {
             FindClosestBotToPlayer();
         }
 
+        /// <summary>
+        /// Called when an Item moves and reacts to said movement as needed.
+        /// </summary>
+        /// <param name="reporter">Item instance that moved.</param>
         private void ReportItemMoved(Item reporter)
         {
             FindClosestItemToPlayer();
         }
 
+        /// <summary>
+        /// Called when the player instance moves and reacts to said movement as needed.
+        /// </summary>
         private void ReportPlayerMoved()
         {
             FindClosestItemToPlayer();
             FindClosestBotToPlayer();
         }
 
+        /// <summary>
+        /// Uses the manager's internal list to find the closest Item to the player and colors it as needed.
+        /// </summary>
+        /// <seealso cref="UpdateItemColors">UpdateItemColors</seealso>
         private void FindClosestItemToPlayer()
         {
             var sortedArray = itemListRef.OrderBy(t=>(t.transform.position - playerRef.transform.position).
@@ -117,6 +169,10 @@ namespace VirbelaTest
             UpdateItemColors(sortedArray);
         }
         
+        /// <summary>
+        /// Uses the manager's internal list to find the closest Bot to the player and colors it as needed.
+        /// </summary>
+        /// <seealso cref="UpdateBotColors">UpdateBotColors</seealso>
         private void FindClosestBotToPlayer()
         {
             var sortedArray = botListRef.OrderBy(t=>(t.transform.position - playerRef.transform.position).
@@ -125,6 +181,11 @@ namespace VirbelaTest
             UpdateBotColors(sortedArray);
         }
 
+        /// <summary>
+        /// Takes an Item list sorted by distance closest to player and colors the first item on the list with
+        /// <c>itemDefaultColor</c> and everything else with <c>itemDefaultColor.</c>
+        /// </summary>
+        /// <param name="itemArray">Sorted array of Item instances.</param>
         private void UpdateItemColors(Item[] itemArray)
         {
             for (int i=0; i<itemArray.Length; i++)
@@ -140,6 +201,11 @@ namespace VirbelaTest
             }
         }
         
+        /// <summary>
+        /// Takes a Bot list sorted by distance closest to player and colors the first item on the list with
+        /// <c>botDefaultColor</c> and everything else with <c>botDefaultColor.</c>
+        /// </summary>
+        /// <param name="itemArray">Sorted array of Bot instances.</param>
         private void UpdateBotColors(Bot[] botArray)
         {
             for (int i=0; i<botArray.Length; i++)
@@ -155,6 +221,9 @@ namespace VirbelaTest
             }
         }
 
+        /// <summary>
+        /// Clears the scene of Item and Bot objects.
+        /// </summary>
         private void ClearCurrentObjects()
         {
             Destroy(playerRef.gameObject);
@@ -172,6 +241,9 @@ namespace VirbelaTest
             botListRef.Clear();
         }
 
+        /// <summary>
+        /// Saves Player, Item, and Bot positions to a file.
+        /// </summary>
         private void SaveToFile()
         {
             var saveStruct = new SaveData();
@@ -201,6 +273,9 @@ namespace VirbelaTest
             Debug.Log($"File saved. [{destination}]");
         }
 
+        /// <summary>
+        /// Loads Player, Item, and Bot positions from a file located in the app's persistent data path.
+        /// </summary>
         private void LoadFromFile()
         {
             var destination = Application.persistentDataPath + "/" + fileName;
@@ -235,6 +310,9 @@ namespace VirbelaTest
             Debug.Log("Loading complete.");
         }
 
+        /// <summary>
+        /// Manager singleton instance.
+        /// </summary>
         public static Manager Instance { get; private set; }
         
         private void Awake() 
@@ -303,6 +381,9 @@ namespace VirbelaTest
         }
     }
 
+    /// <summary>
+    /// Struct used for saving data.
+    /// </summary>
     [Serializable]
     public struct SaveData
     {
