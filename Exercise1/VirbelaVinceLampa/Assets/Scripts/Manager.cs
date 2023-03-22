@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace VirbelaTest
 {
@@ -271,6 +272,24 @@ namespace VirbelaTest
 
         private void Update()
         {
+            //add bot
+            if (Input.GetKeyUp(KeyCode.B))
+            {
+                var newBot = GameObject.Instantiate(botPrefab);
+                newBot.name = "Bot" + botReference.Count;
+                newBot.transform.position = new Vector3(Random.Range(-5f, 5f), 
+                    Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+            }
+            
+            //add item
+            if (Input.GetKeyUp(KeyCode.I))
+            {
+                var newItem = GameObject.Instantiate(itemPrefab);
+                newItem.name = "Item" + itemReference.Count;
+                newItem.transform.position = new Vector3(Random.Range(-5f, 5f), 
+                    Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+            }
+            
             //save to file
             if (Input.GetKeyUp(KeyCode.S))
             {
