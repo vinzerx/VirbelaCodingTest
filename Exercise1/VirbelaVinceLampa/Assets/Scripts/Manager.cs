@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace VirbelaTest
@@ -37,9 +38,18 @@ namespace VirbelaTest
             FindClosestBotToPlayer();
         }
 
-        public void UnregisterItem(Item deletedItem)
+        public void UnregisterMovable(MovableObject deletedMovable)
         {
-            itemReference.Remove(deletedItem);
+            if (deletedMovable is Item)
+            {
+                itemReference.Remove((Item)deletedMovable);
+                FindClosestItemToPlayer();
+            }
+            else if (deletedMovable is Bot)
+            {
+                botReference.Remove((Bot)deletedMovable);
+                FindClosestBotToPlayer();
+            }
         }
 
         public void ReportMovableMoved(MovableObject moveObj)

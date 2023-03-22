@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace VirbelaTest
@@ -7,14 +5,7 @@ namespace VirbelaTest
     public abstract class MovableObject : MonoBehaviour
     {
         protected Vector3 currentPosition;
-    
-        // Start is called before the first frame update
-        void Start()
-        {
         
-        }
-
-        // Update is called once per frame
         protected virtual void Update()
         {
             if (currentPosition != transform.position)
@@ -22,6 +13,11 @@ namespace VirbelaTest
                 Manager.Instance.ReportMovableMoved(this);
                 currentPosition = transform.position;
             }
+        }
+
+        protected void OnDestroy()
+        {
+            Manager.Instance.UnregisterMovable(this);
         }
     }
 }
