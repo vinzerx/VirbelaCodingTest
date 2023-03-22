@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -24,8 +21,8 @@ namespace VirbelaTest
         [SerializeField] private string fileName = "save.dat";
         [SerializeField] private bool loadFromFileAtStart;
         
-        private Dictionary<Item, float> itemReference;
-        private Dictionary<Bot, float> botReference;
+        private List<Item> itemListRef;
+        private List<Bot> botListRef;
         private Player playerRef;
         
         public void RegisterPlayer(Player newPlayer)
@@ -35,16 +32,14 @@ namespace VirbelaTest
 
         public void RegisterItem(Item newItem)
         {
-            var distToPlayer = Vector3.Distance(playerRef.transform.position, newItem.transform.position);
-            itemReference.Add(newItem, distToPlayer);
+            itemListRef.Add(newItem);
 
             FindClosestItemToPlayer();
         }
         
         public void RegisterBot(Bot newBot)
         {
-            var distToPlayer = Vector3.Distance(playerRef.transform.position, newBot.transform.position);
-            botReference.Add(newBot, distToPlayer);
+            botListRef.Add(newBot);
 
             FindClosestBotToPlayer();
         }
@@ -53,12 +48,26 @@ namespace VirbelaTest
         {
             if (deletedMovable is Item)
             {
-                itemReference.Remove((Item)deletedMovable);
+                itemListRef.Remove((Item)deletedMovable);
+                
+                //ensure no errors thrown on exit
+                if (playerRef == null)
+                {
+                    return;
+                }
+                
                 FindClosestItemToPlayer();
             }
             else if (deletedMovable is Bot)
             {
-                botReference.Remove((Bot)deletedMovable);
+                botListRef.Remove((Bot)deletedMovable);
+                
+                //ensure no errors thrown on exit
+                if (playerRef == null)
+                {
+                    return;
+                }
+                
                 FindClosestBotToPlayer();
             }
         }
@@ -81,86 +90,62 @@ namespace VirbelaTest
         
         private void ReportBotMoved(Bot reporter)
         {
-            var distance = Vector3.Distance(playerRef.transform.position, reporter.transform.position);
-            botReference[reporter] = distance;
-
             FindClosestBotToPlayer();
         }
 
         private void ReportItemMoved(Item reporter)
         {
-            var distance = Vector3.Distance(playerRef.transform.position, reporter.transform.position);
-            itemReference[reporter] = distance;
-
             FindClosestItemToPlayer();
         }
 
         private void ReportPlayerMoved()
         {
-            var itemList = itemReference.Keys.ToList();
-            for (int i=0; i<itemList.Count; i++)
-            {
-                var distance = Vector3.Distance(playerRef.transform.position, 
-                    itemList[i].transform.position);
-                itemReference[itemList[i]] = distance;
-            }
-            
-            var botList = botReference.Keys.ToList();
-            for (int i=0; i<botList.Count; i++)
-            {
-                var distance = Vector3.Distance(playerRef.transform.position, 
-                    botList[i].transform.position);
-                botReference[botList[i]] = distance;
-            }
-
             FindClosestItemToPlayer();
             FindClosestBotToPlayer();
         }
 
         private void FindClosestItemToPlayer()
         {
-            var sortedDict = from entry in itemReference 
-                orderby entry.Value ascending select entry;
-            var sortedList =sortedDict.ToList();
+            var sortedArray = itemListRef.OrderBy(t=>(t.transform.position - playerRef.transform.position).
+                    sqrMagnitude).ToArray();
 
-            UpdateItemColors(sortedList);
+            UpdateItemColors(sortedArray);
         }
         
         private void FindClosestBotToPlayer()
         {
-            var sortedDict = from entry in botReference 
-                orderby entry.Value ascending select entry;
-            var sortedList =sortedDict.ToList();
+            var sortedArray = botListRef.OrderBy(t=>(t.transform.position - playerRef.transform.position).
+                    sqrMagnitude).ToArray();
 
-            UpdateBotColors(sortedList);
+            UpdateBotColors(sortedArray);
         }
 
-        private void UpdateItemColors(List<KeyValuePair<Item, float>> itemList)
+        private void UpdateItemColors(Item[] itemArray)
         {
-            for (int i=0; i<itemList.Count; i++)
+            for (int i=0; i<itemArray.Length; i++)
             {
                 if (i == 0)
                 {
-                    itemList[i].Key.SetColor(itemClosestColor);
+                    itemArray[i].SetColor(itemClosestColor);
                 }
                 else
                 {
-                    itemList[i].Key.SetColor(itemDefaultColor);
+                    itemArray[i].SetColor(itemDefaultColor);
                 }
             }
         }
         
-        private void UpdateBotColors(List<KeyValuePair<Bot, float>> itemList)
+        private void UpdateBotColors(Bot[] botArray)
         {
-            for (int i=0; i<itemList.Count; i++)
+            for (int i=0; i<botArray.Length; i++)
             {
                 if (i == 0)
                 {
-                    itemList[i].Key.SetColor(botClosestColor);
+                    botArray[i].SetColor(botClosestColor);
                 }
                 else
                 {
-                    itemList[i].Key.SetColor(botDefaultColor);
+                    botArray[i].SetColor(botDefaultColor);
                 }
             }
         }
@@ -169,17 +154,17 @@ namespace VirbelaTest
         {
             Destroy(playerRef.gameObject);
             
-            var itemList = itemReference.Keys.ToList();
-            foreach (var item in itemList)
+            foreach (var item in itemListRef)
             {
                 Destroy(item.gameObject);
             }
+            itemListRef.Clear();
             
-            var botList = botReference.Keys.ToList();
-            foreach (var bot in botList)
+            foreach (var bot in botListRef)
             {
                 Destroy(bot.gameObject);
             }
+            botListRef.Clear();
         }
 
         private void SaveToFile()
@@ -189,15 +174,15 @@ namespace VirbelaTest
             saveStruct.playerPosition = playerRef.transform.position;
                 
             saveStruct.itemPositions = new List<Vector3>();
-            foreach (var pair in itemReference)
+            foreach (var itemObj in itemListRef)
             {
-                saveStruct.itemPositions.Add(pair.Key.transform.position);
+                saveStruct.itemPositions.Add(itemObj.transform.position);
             }
                 
             saveStruct.botPositions = new List<Vector3>();
-            foreach (var pair in botReference)
+            foreach (var botObj in botListRef)
             {
-                saveStruct.botPositions.Add(pair.Key.transform.position);
+                saveStruct.botPositions.Add(botObj.transform.position);
             }
                 
             var destination = Application.persistentDataPath + "/" + fileName;
@@ -233,7 +218,7 @@ namespace VirbelaTest
                 counter++;
             }
 
-            counter = 0;
+            counter = 1;
             foreach (var botPos in saveData.botPositions)
             {
                 var botObj = GameObject.Instantiate(botPrefab);
@@ -256,8 +241,8 @@ namespace VirbelaTest
             else 
             { 
                 Instance = this;
-                itemReference = new Dictionary<Item, float>();
-                botReference = new Dictionary<Bot, float>();
+                itemListRef = new List<Item>();
+                botListRef = new List<Bot>();
             } 
         }
 
@@ -276,7 +261,7 @@ namespace VirbelaTest
             if (Input.GetKeyUp(KeyCode.B))
             {
                 var newBot = GameObject.Instantiate(botPrefab);
-                newBot.name = "Bot" + botReference.Count;
+                newBot.name = "Bot" + botListRef.Count;
                 newBot.transform.position = new Vector3(Random.Range(-5f, 5f), 
                     Random.Range(-5f, 5f), Random.Range(-5f, 5f));
             }
@@ -285,7 +270,7 @@ namespace VirbelaTest
             if (Input.GetKeyUp(KeyCode.I))
             {
                 var newItem = GameObject.Instantiate(itemPrefab);
-                newItem.name = "Item" + itemReference.Count;
+                newItem.name = "Item" + itemListRef.Count;
                 newItem.transform.position = new Vector3(Random.Range(-5f, 5f), 
                     Random.Range(-5f, 5f), Random.Range(-5f, 5f));
             }
