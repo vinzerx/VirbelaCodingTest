@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace VirbelaTest
 {
-    public class Item : MovableObject
+    public class Bot : MovableObject
     {
         [SerializeField] private Renderer myRenderer;
         
@@ -15,7 +15,7 @@ namespace VirbelaTest
         
         void Awake()
         {
-            Manager.Instance.RegisterItem(this);
+            Manager.Instance.RegisterBot(this);
         }
     }
 }

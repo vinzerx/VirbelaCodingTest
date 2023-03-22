@@ -10,7 +10,10 @@ namespace VirbelaTest
     {
         [SerializeField] private Color itemClosestColor;
         [SerializeField] private Color itemDefaultColor;
+        [SerializeField] private Color botClosestColor;
+        [SerializeField] private Color botDefaultColor;
         private Dictionary<Item, float> itemReference;
+        private Dictionary<Bot, float> botReference;
         private Player playerRef;
         
         public void RegisterPlayer(Player newPlayer)
@@ -23,7 +26,15 @@ namespace VirbelaTest
             var distToPlayer = Vector3.Distance(playerRef.transform.position, newItem.transform.position);
             itemReference.Add(newItem, distToPlayer);
 
-            FindClosestToPlayer();
+            FindClosestItemToPlayer();
+        }
+        
+        public void RegisterBot(Bot newBot)
+        {
+            var distToPlayer = Vector3.Distance(playerRef.transform.position, newBot.transform.position);
+            botReference.Add(newBot, distToPlayer);
+
+            FindClosestBotToPlayer();
         }
 
         public void UnregisterItem(Item deletedItem)
@@ -41,6 +52,18 @@ namespace VirbelaTest
             {
                 ReportItemMoved((Item)moveObj);
             }
+            else if (moveObj is Bot)
+            {
+                ReportBotMoved((Bot)moveObj);
+            }
+        }
+        
+        private void ReportBotMoved(Bot reporter)
+        {
+            var distance = Vector3.Distance(playerRef.transform.position, reporter.transform.position);
+            botReference[reporter] = distance;
+
+            FindClosestBotToPlayer();
         }
 
         private void ReportItemMoved(Item reporter)
@@ -48,7 +71,7 @@ namespace VirbelaTest
             var distance = Vector3.Distance(playerRef.transform.position, reporter.transform.position);
             itemReference[reporter] = distance;
 
-            FindClosestToPlayer();
+            FindClosestItemToPlayer();
         }
 
         private void ReportPlayerMoved()
@@ -60,20 +83,38 @@ namespace VirbelaTest
                     itemList[i].transform.position);
                 itemReference[itemList[i]] = distance;
             }
+            
+            var botList = botReference.Keys.ToList();
+            for (int i=0; i<botList.Count; i++)
+            {
+                var distance = Vector3.Distance(playerRef.transform.position, 
+                    botList[i].transform.position);
+                botReference[botList[i]] = distance;
+            }
 
-            FindClosestToPlayer();
+            FindClosestItemToPlayer();
+            FindClosestBotToPlayer();
         }
 
-        private void FindClosestToPlayer()
+        private void FindClosestItemToPlayer()
         {
             var sortedDict = from entry in itemReference 
                 orderby entry.Value ascending select entry;
             var sortedList =sortedDict.ToList();
 
-            UpdateColors(sortedList);
+            UpdateItemColors(sortedList);
+        }
+        
+        private void FindClosestBotToPlayer()
+        {
+            var sortedDict = from entry in botReference 
+                orderby entry.Value ascending select entry;
+            var sortedList =sortedDict.ToList();
+
+            UpdateBotColors(sortedList);
         }
 
-        private void UpdateColors(List<KeyValuePair<Item, float>> itemList)
+        private void UpdateItemColors(List<KeyValuePair<Item, float>> itemList)
         {
             for (int i=0; i<itemList.Count; i++)
             {
@@ -84,6 +125,21 @@ namespace VirbelaTest
                 else
                 {
                     itemList[i].Key.SetColor(itemDefaultColor);
+                }
+            }
+        }
+        
+        private void UpdateBotColors(List<KeyValuePair<Bot, float>> itemList)
+        {
+            for (int i=0; i<itemList.Count; i++)
+            {
+                if (i == 0)
+                {
+                    itemList[i].Key.SetColor(botClosestColor);
+                }
+                else
+                {
+                    itemList[i].Key.SetColor(botDefaultColor);
                 }
             }
         }
@@ -100,6 +156,7 @@ namespace VirbelaTest
             { 
                 Instance = this;
                 itemReference = new Dictionary<Item, float>();
+                botReference = new Dictionary<Bot, float>();
             } 
         }
     }
