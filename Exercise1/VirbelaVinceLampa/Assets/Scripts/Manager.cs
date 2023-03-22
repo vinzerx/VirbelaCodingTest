@@ -17,6 +17,7 @@ namespace VirbelaTest
         [SerializeField] private Color botClosestColor;
         [SerializeField] private Color botDefaultColor;
 
+        [SerializeField] private GameObject playerPrefab;
         [SerializeField] private GameObject itemPrefab;
         [SerializeField] private GameObject botPrefab;
         [SerializeField] private string fileName = "save.dat";
@@ -165,6 +166,8 @@ namespace VirbelaTest
 
         private void ClearCurrentObjects()
         {
+            Destroy(playerRef.gameObject);
+            
             var itemList = itemReference.Keys.ToList();
             foreach (var item in itemList)
             {
@@ -181,6 +184,8 @@ namespace VirbelaTest
         private void SaveToFile()
         {
             var saveStruct = new SaveData();
+
+            saveStruct.playerPosition = playerRef.transform.position;
                 
             saveStruct.itemPositions = new List<Vector3>();
             foreach (var pair in itemReference)
@@ -213,6 +218,11 @@ namespace VirbelaTest
             var data = reader.ReadToEnd();
             
             var saveData = JsonUtility.FromJson<SaveData>(data);
+            
+            var playerObj = GameObject.Instantiate(playerPrefab);
+            playerObj.name = "Player";
+            playerObj.transform.position = saveData.playerPosition;
+            
             var counter = 1;
             foreach (var itemPos in saveData.itemPositions)
             {
@@ -287,6 +297,7 @@ namespace VirbelaTest
     [Serializable]
     public struct SaveData
     {
+        public Vector3 playerPosition;
         public List<Vector3> itemPositions;
         public List<Vector3> botPositions;
     }
