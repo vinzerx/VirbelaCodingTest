@@ -24,6 +24,11 @@ namespace VirbelaTest
         private List<Item> itemListRef;
         private List<Bot> botListRef;
         private Player playerRef;
+
+        public Color ItemClosestColor => itemClosestColor;
+        public Color ItemDefaultColor => itemDefaultColor;
+        public Color BotClosestColor => botClosestColor;
+        public Color BotDefaultColor => botDefaultColor;
         
         public void RegisterPlayer(Player newPlayer)
         {
