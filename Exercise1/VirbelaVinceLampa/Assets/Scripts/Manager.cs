@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,6 +16,12 @@ namespace VirbelaTest
         [SerializeField] private Color itemDefaultColor;
         [SerializeField] private Color botClosestColor;
         [SerializeField] private Color botDefaultColor;
+
+        [SerializeField] private GameObject itemPrefab;
+        [SerializeField] private GameObject botPrefab;
+        [SerializeField] private string fileName = "save.dat";
+        [SerializeField] private bool loadFromFileAtStart;
+        
         private Dictionary<Item, float> itemReference;
         private Dictionary<Bot, float> botReference;
         private Player playerRef;
@@ -154,6 +163,77 @@ namespace VirbelaTest
             }
         }
 
+        private void ClearCurrentObjects()
+        {
+            var itemList = itemReference.Keys.ToList();
+            foreach (var item in itemList)
+            {
+                Destroy(item.gameObject);
+            }
+            
+            var botList = botReference.Keys.ToList();
+            foreach (var bot in botList)
+            {
+                Destroy(bot.gameObject);
+            }
+        }
+
+        private void SaveToFile()
+        {
+            var saveStruct = new SaveData();
+                
+            saveStruct.itemPositions = new List<Vector3>();
+            foreach (var pair in itemReference)
+            {
+                saveStruct.itemPositions.Add(pair.Key.transform.position);
+            }
+                
+            saveStruct.botPositions = new List<Vector3>();
+            foreach (var pair in botReference)
+            {
+                saveStruct.botPositions.Add(pair.Key.transform.position);
+            }
+                
+            var destination = Application.persistentDataPath + "/" + fileName;
+            var saveString = JsonUtility.ToJson(saveStruct);
+                
+            var writer = new StreamWriter(destination);
+            writer.WriteLine(saveString);
+
+            writer.Close();
+            
+            Debug.Log($"File saved. [{destination}]");
+        }
+
+        private void LoadFromFile()
+        {
+            var destination = Application.persistentDataPath + "/" + fileName;
+
+            var reader = new StreamReader(destination);
+            var data = reader.ReadToEnd();
+            
+            var saveData = JsonUtility.FromJson<SaveData>(data);
+            var counter = 1;
+            foreach (var itemPos in saveData.itemPositions)
+            {
+                var itemObj = GameObject.Instantiate(itemPrefab);
+                itemObj.name = "Item" + counter;
+                itemObj.transform.position = itemPos;
+                counter++;
+            }
+
+            counter = 0;
+            foreach (var botPos in saveData.botPositions)
+            {
+                var botObj = GameObject.Instantiate(botPrefab);
+                botObj.name = "Bot" + counter;
+                botObj.transform.position = botPos;
+                counter++;
+            }
+            
+            Debug.Log("Loading complete.");
+        }
+
         public static Manager Instance { get; private set; }
         
         private void Awake() 
@@ -169,5 +249,45 @@ namespace VirbelaTest
                 botReference = new Dictionary<Bot, float>();
             } 
         }
+
+        private void Start()
+        {
+            if (loadFromFileAtStart)
+            {
+                ClearCurrentObjects();
+                LoadFromFile();
+            }
+        }
+
+        private void Update()
+        {
+            //save to file
+            if (Input.GetKeyUp(KeyCode.S))
+            {
+                SaveToFile();
+            }
+            
+            //load from file
+            if (Input.GetKeyUp(KeyCode.L))
+            {
+                if (File.Exists(Application.persistentDataPath + "/" + fileName))
+                {
+                    ClearCurrentObjects();
+                    LoadFromFile();
+                    Debug.Log("Loading file...");
+                }
+                else
+                {
+                    Debug.LogWarning("[Manager] No data file found on the system.");
+                }
+            }
+        }
+    }
+
+    [Serializable]
+    public struct SaveData
+    {
+        public List<Vector3> itemPositions;
+        public List<Vector3> botPositions;
     }
 }

@@ -342,6 +342,10 @@ MonoBehaviour:
   itemDefaultColor: {r: 1, g: 1, b: 1, a: 1}
   botClosestColor: {r: 0, g: 0, b: 1, a: 1}
   botDefaultColor: {r: 1, g: 1, b: 1, a: 1}
+  itemPrefab: {fileID: 7243127280112790281, guid: 7852685c941822646b12eb11a13ab8e9, type: 3}
+  botPrefab: {fileID: 4931478849983263301, guid: d5a97cdc92063934db4d8f298cee9848, type: 3}
+  fileName: save.dat
+  loadFromFileAtStart: 1
 --- !u!1 &793841235
 GameObject:
   m_ObjectHideFlags: 0
