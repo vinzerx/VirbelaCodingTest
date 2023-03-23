@@ -23,4 +23,3 @@ Feel free to use whatever resources you'd typically use when doing development w
 ### Exercises ###
 
 * [Exercise 1](./Exercise1/EXERCISE_1.md)
-* [Exercise 2](./Exercise2/EXERCISE_2.md)
