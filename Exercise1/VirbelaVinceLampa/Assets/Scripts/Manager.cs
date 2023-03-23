@@ -338,8 +338,16 @@ namespace VirbelaTest
             //used an inspector-editable parameter to be more flexible in use
             if (loadFromFileAtStart)
             {
-                ClearCurrentObjects();
-                LoadFromFile();
+                if (File.Exists(Application.persistentDataPath + "/" + fileName))
+                {
+                    ClearCurrentObjects();
+                    LoadFromFile();
+                    Debug.Log("Loading file...");
+                }
+                else
+                {
+                    Debug.LogWarning("[Manager] No data file found on the system.");
+                }
             }
         }
 
