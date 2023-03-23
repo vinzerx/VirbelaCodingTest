@@ -53,10 +53,20 @@ Allow the designer to choose the base color and highlight color for Items/Bots a
 
 ## Questions ##
 
- 1. How can your implementation be optimized?
- 1. How much time did you spend on your implementation?
- 1. What was most challenging for you?
- 1. What else would you add to this exercise?
+ 1. How can your implementation be optimized? - If the end result doesn't need to be super-accurate all the time, checking if any of the movables (Item, Bot, Player) moved can probably be done at a longer period of time instead of doing it every frame. An event system could also be put in place to detect if a movable moved instead of checking a stored position on the script versus the current position of the movable in the Update loop.
+
+ 2. How much time did you spend on your implementation? - The implementation itself took around 5 hours.
+
+ 3. What was most challenging for you? - Unit testing in Unity wasn't part of the things we did in previous companies, so I had to learn this one on the fly.
+
+ 4. What else would you add to this exercise? - I would like to add a control system in play mode, mostly to make it easier to switch to the event-driven approach to know when to do the closest item/bot checking. To make it more flexible, maybe something like click on any of the movables then use some set controls to move the object so it doesn't have to be the player that could be moved with said play mode controls.
+
+## Extra Notes ##
+Controls for other functionalities are listed below:
+I - Adds an Item instance
+B - Adds a Bot instance
+S - Saves to file
+L - Loads from file (additional option - Manager instance has a loadFromFileAtStart boolean that can be toggled in the inspector to load an existing file at the start of runtime)
 
 ## Optional ##
 
