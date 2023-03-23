@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace VirbelaTest
 {
+    //used a singleton to reduce need for hard references or needing to use FindObjectOfType
     /// <summary>
     /// Main class that handles distance detection between player and other objects.
     /// </summary>
@@ -110,6 +111,7 @@ namespace VirbelaTest
             }
         }
 
+        //essentially the "listener" method so the class wouldn't need to use the update loop
         /// <summary>
         /// Invoked to notify manager that a Movable has moved.
         /// </summary>
@@ -157,6 +159,7 @@ namespace VirbelaTest
             FindClosestBotToPlayer();
         }
 
+        //sort by distance then pass to color-setting method, same for the bot list
         /// <summary>
         /// Uses the manager's internal list to find the closest Item to the player and colors it as needed.
         /// </summary>
@@ -205,7 +208,7 @@ namespace VirbelaTest
         /// Takes a Bot list sorted by distance closest to player and colors the first item on the list with
         /// <c>botDefaultColor</c> and everything else with <c>botDefaultColor.</c>
         /// </summary>
-        /// <param name="itemArray">Sorted array of Bot instances.</param>
+        /// <param name="botArray">Sorted array of Bot instances.</param>
         private void UpdateBotColors(Bot[] botArray)
         {
             for (int i=0; i<botArray.Length; i++)
@@ -289,6 +292,7 @@ namespace VirbelaTest
             playerObj.name = "Player";
             playerObj.transform.position = saveData.playerPosition;
             
+            //counter is an extra used just to nicely format object names
             var counter = 1;
             foreach (var itemPos in saveData.itemPositions)
             {
@@ -331,6 +335,7 @@ namespace VirbelaTest
 
         private void Start()
         {
+            //used an inspector-editable parameter to be more flexible in use
             if (loadFromFileAtStart)
             {
                 ClearCurrentObjects();
@@ -345,6 +350,8 @@ namespace VirbelaTest
             {
                 var newBot = GameObject.Instantiate(botPrefab);
                 newBot.name = "Bot" + botListRef.Count;
+                
+                //restrict randomized locations so as not to be too far from the scene view
                 newBot.transform.position = new Vector3(Random.Range(-5f, 5f), 
                     Random.Range(-5f, 5f), Random.Range(-5f, 5f));
             }
@@ -354,6 +361,8 @@ namespace VirbelaTest
             {
                 var newItem = GameObject.Instantiate(itemPrefab);
                 newItem.name = "Item" + itemListRef.Count;
+                
+                //restrict randomized locations so as not to be too far from the scene view
                 newItem.transform.position = new Vector3(Random.Range(-5f, 5f), 
                     Random.Range(-5f, 5f), Random.Range(-5f, 5f));
             }
@@ -364,7 +373,7 @@ namespace VirbelaTest
                 SaveToFile();
             }
             
-            //load from file
+            //load from file - extra flexibility, also useful when I was testing the functionality
             if (Input.GetKeyUp(KeyCode.L))
             {
                 if (File.Exists(Application.persistentDataPath + "/" + fileName))
