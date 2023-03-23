@@ -63,10 +63,10 @@ Allow the designer to choose the base color and highlight color for Items/Bots a
 
 ## Extra Notes ##
 Controls for other functionalities are listed below:
-I - Adds an Item instance
-B - Adds a Bot instance
-S - Saves to file
-L - Loads from file (additional option - Manager instance has a loadFromFileAtStart boolean that can be toggled in the inspector to load an existing file at the start of runtime)
+* I - Adds an Item instance
+* B - Adds a Bot instance
+* S - Saves to file
+* L - Loads from file (additional option - Manager instance has a loadFromFileAtStart boolean that can be toggled in the inspector to load an existing file at the start of runtime)
 
 ## Optional ##
 
